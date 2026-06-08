@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <title>TurbineAlign Pro | Industrial Shaft Alignment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #F0F4FA;
+            font-family: 'Inter', sans-serif;
+            padding: 20px 16px 40px;
+            color: #0A2540;
+        }
+        .app-container { max-width: 560px; margin: 0 auto; }
+        .card {
+            background: #FFFFFF;
+            border-radius: 32px;
+            box-shadow: 0 12px 30px -8px rgba(0, 0, 0, 0.05), 0 2px 8px rgba(0, 0, 0, 0.02);
+            padding: 22px 20px;
+            margin-bottom: 20px;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(0, 0, 0, 0.02);
+        }
+        .step-row {
+            display: flex;
+            justify-content: space-between;
+            background: white;
+            border-radius: 60px;
+            padding: 6px 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+        .step-item {
+            flex: 1;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: #94A3B8;
+            padding: 8px 4px;
+            border-radius: 40px;
+            transition: all 0.2s;
+        }
+        .step-item.active { background: #1E6DFF; color: white; box-shadow: 0 6px 14px rgba(30,109,255,0.25); }
+        .step-item.completed { color: #1E6DFF; }
+        .input-group { margin-bottom: 18px; }
+        .input-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #5A6E86; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+        input, select { width: 100%; padding: 14px 16px; font-size: 15px; border: 1.5px solid #E2E8F0; border-radius: 24px; background: white; font-weight: 500; transition: 0.2s; }
+        input:focus { outline: none; border-color: #1E6DFF; box-shadow: 0 0 0 3px rgba(30,109,255,0.1); }
+        .calculated-value { background: #F0F7FF; padding: 14px 16px; border-radius: 24px; font-weight: 700; font-size: 18px; color: #1E6DFF; }
+        .btn-primary {
+            background: #1E6DFF;
+            border: none;
+            width: 100%;
+            padding: 16px;
+            border-radius: 48px;
+            font-weight: 700;
+            font-size: 16px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 12px rgba(30,109,255,0.3);
+        }
+        .btn-primary:active { transform: scale(0.97); background: #0a5ad6; }
+        .btn-secondary { background: #F1F5F9; border: none; padding: 12px 18px; border-radius: 40px; font-weight: 600; color: #1E6DFF; cursor: pointer; transition: 0.2s; }
+        .device-card { background: linear-gradient(135deg, #F9FCFE 0%, #FFFFFF 100%); border-radius: 28px; padding: 18px; border-left: 5px solid #2DC96C; margin-bottom: 16px; }
+        .status-badge { display: inline-flex; align-items: center; gap: 6px; background: #E5F6E9; padding: 6px 14px; border-radius: 30px; font-size: 12px; font-weight: 700; }
+        .mode-switch { display: flex; gap: 12px; margin: 16px 0 8px; }
+        .mode-btn { flex: 1; background: #F1F5F9; border-radius: 44px; padding: 12px; text-align: center; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .mode-active { background: #1E6DFF; color: white; }
+        .tree-item { margin-bottom: 16px; }
+        .tree-header { font-weight: 800; padding: 8px 0; cursor: pointer; display: flex; justify-content: space-between; border-bottom: 2px solid #EFF3F8; }
+        .axis-grid { display: flex; gap: 12px; margin-top: 8px; flex-wrap: wrap; }
+        .axis-chip { background: #EFF3F8; padding: 6px 16px; border-radius: 40px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.1s; }
+        .axis-chip.completed { background: #1E6DFF; color: white; }
+        .axis-chip.selected { background: #FFC107; color: #1E2F3F; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .live-reading-card { background: #0A1A2E; border-radius: 32px; padding: 24px; text-align: center; margin: 16px 0; }
+        .big-number { font-size: 58px; font-weight: 800; font-family: monospace; color: #6EE7FF; background: #041220; display: inline-block; padding: 8px 28px; border-radius: 60px; }
+        .history-table { width: 100%; border-collapse: collapse; }
+        .history-table td, .history-table th { padding: 12px 4px; border-bottom: 1px solid #EFF3F8; }
+        .stats-grid { display: flex; gap: 12px; margin: 16px 0; }
+        .stat-card { background: #F8FAFE; flex: 1; border-radius: 20px; padding: 12px; text-align: center; }
+        .kpi-grid { display: flex; gap: 12px; flex-wrap: wrap; }
+        .kpi-card { background: #F8FAFE; flex: 1; border-radius: 24px; padding: 16px; text-align: center; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .progress-linear { height: 10px; background: #E2E8F0; border-radius: 20px; margin: 12px 0; overflow: hidden; }
+        .progress-fill { background: #1E6DFF; width: 0%; height: 100%; border-radius: 20px; transition: width 0.3s; }
+        .hidden { display: none; }
+        i.icon-mr { margin-right: 8px; }
+        h3 { font-size: 18px; margin-bottom: 16px; font-weight: 800; }
+        hr { margin: 16px 0; border-color: #EFF3F8; }
+        canvas { max-height: 180px; width: 100%; }
+        .nav-buttons { display: flex; gap: 12px; margin-top: 16px; }
+        .flange-viz-container { text-align: center; margin: 16px 0; background: #F8FBFE; border-radius: 28px; padding: 16px; }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .data-table th, .data-table td { padding: 8px 4px; text-align: center; border-bottom: 1px solid #EDF2F7; }
+        .section-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+        .section-tab { flex: 1; text-align: center; padding: 10px; background: #F1F5F9; border-radius: 30px; font-weight: 700; cursor: pointer; }
+        .section-tab.active { background: #1E6DFF; color: white; }
+        .recommend-card { background: #F8FCFE; border-radius: 20px; padding: 14px; margin-bottom: 12px; }
+    </style>
+</head>
+<body>
+<div class="app-container" id="appRoot">
+    <div style="margin-bottom: 8px;"><h1 style="font-size: 24px; font-weight: 800;"><i class="fas fa-turbine"></i> Turbine Alignment Inspection</h1></div>
+    <div class="step-row"><div class="step-item" data-step="0">1 Setup</div><div class="step-item" data-step="1">2 Measurement</div><div class="step-item" data-step="2">3 Analysis</div><div class="step-item" data-step="3">4 Report</div></div>
+
+    <!-- STEP 0: SETUP -->
+    <div id="step0Panel"><div class="card"><h3><i class="fas fa-cog"></i> Inspection Configuration</h3>
+        <div class="input-group"><div class="input-label"><i class="fas fa-file-signature"></i> Inspection Name</div><input type="text" id="inspectionName" value="Overhaul #24-09 - Turbine Alignment"></div>
+        <div class="input-group"><div class="input-label"><i class="fas fa-user-hard-hat"></i> Technician Name</div><input type="text" id="techName" value="Michael Chen (Senior Engineer)"></div>
+        <div class="input-group"><div class="input-label"><i class="fas fa-chart-simple"></i> Number of Measurement Iterations</div><input type="number" id="iterationsCount" value="4" min="2" max="8"></div>
+        <div class="input-group"><div class="input-label"><i class="fas fa-gauge-high"></i> Current Torque (Nm)</div><input type="number" id="currTorque" value="385"></div>
+        <div class="input-group"><div class="input-label"><i class="fas fa-chart-line"></i> Maximum Torque (Nm)</div><input type="number" id="maxTorque" value="450"></div>
+        <div class="input-group"><div class="input-label">Torque Difference</div><div class="calculated-value" id="torqueDiff">65 Nm</div></div>
+        <div class="input-group"><div class="input-label"><i class="fas fa-arrows-left-right"></i> Generator Bearing → Clutch (mm)</div><input type="number" id="genClutch" value="124.80" step="0.01"></div>
+        <div class="input-group"><div class="input-label"><i class="fas fa-exchange-alt"></i> Clutch → Turbine (mm)</div><input type="number" id="clutchTurbine" value="88.40" step="0.01"></div>
+        <div class="input-group"><div class="input-label"><i class="fas fa-industry"></i> Turbine → Generator (mm)</div><input type="number" id="turbineGen" value="211.30" step="0.01"></div>
+        <button class="btn-primary" id="startInspectionBtn"><i class="fas fa-play"></i> Start Inspection</button>
+    </div></div>
+
+    <!-- STEP 1: MEASUREMENT -->
+    <div id="step1Panel" style="display:none;"><div class="card"><h3><i class="fas fa-bluetooth-b"></i> Connect Measuring Device</h3>
+        <div class="device-card"><div><strong>Mitutoyo Bluetooth Dial Gauge</strong><br><span style="font-size:13px;">Model: DG-5000 PRO</span></div><div><span id="btStatusText" class="status-badge"><i class="fas fa-circle" style="color:#2DC96C;"></i> Connected</span></div></div>
+        <div class="flex-between"><span><i class="fas fa-battery-full"></i> Battery: <span id="batteryLevel">87%</span></span><span><i class="fas fa-signal"></i> Signal: <span id="signalStrength">Excellent</span></span></div>
+        <div style="display: flex; gap: 12px; margin-top: 12px;"><button class="btn-secondary" id="connectBT"><i class="fas fa-plug"></i> Connect</button><button class="btn-secondary" id="disconnectBT"><i class="fas fa-unlink"></i> Disconnect</button></div>
+        <div class="mode-switch"><div id="btModeBtn" class="mode-btn mode-active"><i class="fab fa-bluetooth"></i> Bluetooth Mode</div><div id="manualModeBtn" class="mode-btn"><i class="fas fa-keyboard"></i> Manual Mode</div></div>
+    </div>
+    <div class="card"><h3>Measurement Progress</h3><div class="flex-between"><span>Overall Progress</span><strong id="overallProgressText">0 / 12 Points</strong></div><div class="progress-linear"><div class="progress-fill" id="overallProgressFill" style="width:0%"></div></div>
+        <div id="measurementTree"></div>
+    </div>
+    <div class="card"><div class="flex-between"><h3><span id="selectedPointLabel">Upper → Axis A</span></h3><span class="status-badge"><i class="fas fa-microphone-alt"></i> Live</span></div>
+        <div class="live-reading-card"><div style="color:#9BB7D4;">Live Reading</div><div class="big-number" id="liveReadingValue">49.00</div><div><span class="status-badge"><i class="fas fa-check-circle"></i> ● Stable</span> <i class="fas fa-bluetooth" style="margin-left:8px;"></i></div><div style="margin-top:12px;">"Press HOLD on Dial Gauge then press CAPTURE"</div><button class="btn-primary" id="captureBtn" style="margin-top:16px;"><i class="fas fa-camera"></i> Capture Reading</button></div>
+        <div id="manualInputDiv" style="display:none;"><input type="number" step="0.01" id="manualVal" placeholder="Enter mm value"><button class="btn-secondary" id="manualCaptureBtn" style="margin-top:8px; width:100%;">Manual Capture</button></div>
+        <h4>Measurement History (Iterations)</h4><table class="history-table"><thead><tr><th>Iteration</th><th>Value (mm)</th></tr></thead><tbody id="historyTbody"></tbody></table>
+        <div class="stats-grid"><div class="stat-card"><div>Average</div><strong id="avgVal">--</strong></div><div class="stat-card"><div>Min</div><strong id="minVal">--</strong></div><div class="stat-card"><div>Max</div><strong id="maxVal">--</strong></div></div>
+        <div class="nav-buttons"><button class="btn-secondary" id="prevAxisBtn"><i class="fas fa-arrow-left"></i> Previous Axis</button><button class="btn-secondary" id="nextAxisBtn">Next Axis <i class="fas fa-arrow-right"></i></button></div>
+    </div>
+    <div class="card"><div class="section-tabs" id="dataViewTabs"><div class="section-tab active" data-tab="Upper">Upper</div><div class="section-tab" data-tab="Clutch">Clutch</div><div class="section-tab" data-tab="Turbine">Turbine</div></div>
+        <div id="dataTableContainer"></div>
+        <div id="avgValuesDisplay" class="stats-grid" style="margin-top:12px;"></div>
+        <button class="btn-primary" id="analyzeBtn"><i class="fas fa-chart-line"></i> Analyze Alignment</button>
+    </div></div>
+
+    <!-- STEP 2: ANALYSIS (Flange Visualization + KPIs) -->
+    <div id="step2Panel" style="display:none;"><div class="card"><h3><i class="fas fa-chart-pie"></i> Flange Alignment Analysis</h3>
+        <div class="flange-viz-container"><canvas id="flangeCanvas" width="400" height="400" style="width:100%; max-width:400px; height:auto; background:#F8FBFE; border-radius:28px;"></canvas></div>
+        <div class="kpi-grid"><div class="kpi-card"><i class="fas fa-arrow-up"></i> Vertical Offset<br><strong id="verticalOffsetVal">0.05 mm</strong></div><div class="kpi-card"><i class="fas fa-arrows-alt-h"></i> Horizontal Offset<br><strong id="horizontalOffsetVal">0.02 mm</strong></div><div class="kpi-card"><i class="fas fa-chart-line"></i> Slope<br><strong id="slopeVal">0.08 mm/m</strong></div></div>
+        <div class="status-badge" id="toleranceBadge" style="background:#DCFCE7; margin:10px 0;"><i class="fas fa-check-circle"></i> ✓ WITHIN TOLERANCE</div>
+        <canvas id="trendGraphCanvas" style="height:150px; margin-top:8px;"></canvas>
+    </div>
+    <div class="card"><h3><i class="fas fa-wrench"></i> Recommended Adjustment</h3>
+        <div class="recommend-card"><div class="flex-between"><span><strong>Torque Adjustment</strong></span><span class="status-badge">Priority: Medium</span></div></div>
+        <div id="torqueRecList"></div>
+        <div class="recommend-card"><strong>Shim Recommendation</strong><br><span id="shimRec">Add Shim +0.25 mm / Remove Shim -0.10 mm</span></div>
+    </div>
+    <button class="btn-primary" id="goToReportBtn"><i class="fas fa-file-alt"></i> Generate Report</button></div>
+
+    <!-- STEP 3: REPORT -->
+    <div id="step3Panel" style="display:none;"><div class="card"><h3><i class="fas fa-clipboard-list"></i> Inspection Report</h3>
+        <div class="flex-between"><span>Inspection Name</span><strong id="reportInspName">--</strong></div><div class="flex-between"><span>Technician</span><strong id="reportTech">--</strong></div><div class="flex-between"><span>Date</span><strong id="reportDate">--</strong></div>
+        <div class="flex-between"><span>Device Used</span><strong>Mitutoyo DG-5000 PRO</strong></div><div class="flex-between"><span>Measurement Count</span><strong id="totalMeasPoints">12 points</strong></div>
+        <div class="flex-between"><span>Alignment Status</span><strong id="reportStatus">Within Tolerance</strong></div><hr>
+        <div class="flex-between"><span>Vertical Offset</span><strong id="finalVert">0.05 mm</strong></div><div class="flex-between"><span>Horizontal Offset</span><strong id="finalHoriz">0.02 mm</strong></div>
+        <div style="display: flex; gap: 12px; margin-top: 24px;"><button class="btn-secondary" id="exportPDFBtn"><i class="fas fa-file-pdf"></i> Export PDF</button><button class="btn-secondary" id="shareReportBtn"><i class="fas fa-share-alt"></i> Share Report</button><button class="btn-primary" id="saveInspectionBtn"><i class="fas fa-save"></i> Save Inspection</button></div>
+    </div></div>
+</div>
+
+<script>
+    // Global state
+    const sections = ["Upper", "Clutch", "Turbine"];
+    const axesList = ["A", "B", "C", "D"];
+    let measurements = {};   // "Upper_A": [values]
+    let iterationsCount = 4;
+    let currentSectionIdx = 0, currentAxisIdx = 0;
+    let isBluetoothMode = true, btConnected = true;
+    let currentStep = 0;
+    let flangeChart, trendChart;
+
+    function initData() { for(let s of sections) for(let ax of axesList) measurements[`${s}_${ax}`] = new Array(iterationsCount).fill(null); }
+    function getCurrentKey() { return `${sections[currentSectionIdx]}_${axesList[currentAxisIdx]}`; }
+    function updateTorqueDiff() { let curr = parseFloat(document.getElementById('currTorque').value)||0; let maxT = parseFloat(document.getElementById('maxTorque').value)||0; document.getElementById('torqueDiff').innerText = (maxT-curr).toFixed(0)+" Nm"; }
+    document.getElementById('currTorque')?.addEventListener('input', updateTorqueDiff);
+    document.getElementById('maxTorque')?.addEventListener('input', updateTorqueDiff);
+    
+    function renderTree() {
+        let html = "";
+        for(let s of sections) {
+            html += `<div class="tree-item"><div class="tree-header"><span><i class="fas fa-cog"></i> ${s}</span><i class="fas fa-chevron-down"></i></div><div class="axis-grid" id="grid-${s}">`;
+            for(let ax of axesList) {
+                let key = `${s}_${ax}`;
+                let completed = measurements[key] && measurements[key].filter(v=>v!==null).length === iterationsCount;
+                let selected = (s === sections[currentSectionIdx] && ax === axesList[currentAxisIdx]);
+                html += `<div class="axis-chip ${completed ? 'completed' : ''} ${selected ? 'selected' : ''}" data-section="${s}" data-axis="${ax}">${ax}</div>`;
+            }
+            html += `</div></div>`;
+        }
+        document.getElementById('measurementTree').innerHTML = html;
+        document.querySelectorAll('.axis-chip').forEach(chip => { chip.addEventListener('click', (e) => { currentSectionIdx = sections.indexOf(chip.dataset.section); currentAxisIdx = axesList.indexOf(chip.dataset.axis); refreshUI(); }); });
+        updateOverallProgress();
+    }
+    
+    function updateOverallProgress() {
+        let total = sections.length * axesList.length, completed = 0;
+        for(let s of sections) for(let ax of axesList) if(measurements[`${s}_${ax}`]?.filter(v=>v!==null).length === iterationsCount) completed++;
+        let percent = (completed/total)*100;
+        document.getElementById('overallProgressFill').style.width = percent+'%';
+        document.getElementById('overallProgressText').innerHTML = `${completed} / ${total} Points`;
+        document.getElementById('selectedPointLabel').innerHTML = `${sections[currentSectionIdx]} → Axis ${axesList[currentAxisIdx]}`;
+    }
+    
+    function renderHistoryAndStats() {
+        let key = getCurrentKey(), data = measurements[key] || [];
+        let tbody = document.getElementById('historyTbody');
+        tbody.innerHTML = "";
+        for(let i=0; i<iterationsCount; i++) { let val = data[i] !== null ? data[i].toFixed(2) : '--'; tbody.innerHTML += `<tr><td>#${i+1}</td><td>${val} mm</td></tr>`; }
+        let valid = data.filter(v=>v!==null);
+        let avg = valid.length ? (valid.reduce((a,b)=>a+b,0)/valid.length).toFixed(3) : '--';
+        let minV = valid.length ? Math.min(...valid).toFixed(3) : '--';
+        let maxV = valid.length ? Math.max(...valid).toFixed(3) : '--';
+        document.getElementById('avgVal').innerText = avg !== '--' ? avg+' mm' : '--';
+        document.getElementById('minVal').innerText = minV !== '--' ? minV+' mm' : '--';
+        document.getElementById('maxVal').innerText = maxV !== '--' ? maxV+' mm' : '--';
+    }
+    
+    function renderDataTables() { let activeTab = document.querySelector('.section-tab.active')?.dataset.tab || "Upper"; let data = []; for(let i=0;i<iterationsCount;i++) { let row = {}; for(let ax of axesList) { let val = measurements[`${activeTab}_${ax}`]?.[i]; row[ax] = val !== null ? val.toFixed(2) : '--'; } data.push(row); }
+        let html = `<table class="data-table"><thead><tr><th>No</th><th>A</th><th>B</th><th>C</th><th>D</th></tr></thead><tbody>`;
+        for(let i=0;i<iterationsCount;i++) html += `<tr><td>${i+1}</td><td>${data[i].A}</td><td>${data[i].B}</td><td>${data[i].C}</td><td>${data[i].D}</td></tr>`;
+        html += `</tbody></table>`; document.getElementById('dataTableContainer').innerHTML = html;
+        let avgs = axesList.map(ax => { let vals = measurements[`${activeTab}_${ax}`]?.filter(v=>v!==null) || []; return vals.length ? (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(3) : '--'; });
+        document.getElementById('avgValuesDisplay').innerHTML = `<div class="stat-card">A Avg: ${avgs[0]} mm</div><div class="stat-card">B Avg: ${avgs[1]} mm</div><div class="stat-card">C Avg: ${avgs[2]} mm</div><div class="stat-card">D Avg: ${avgs[3]} mm</div>`;
+    }
+    
+    function captureReading() {
+        let key = getCurrentKey();
+        let val = null;
+        if(isBluetoothMode && btConnected) val = parseFloat((48 + Math.random()*2.5).toFixed(2));
+        else if(!isBluetoothMode) { let manual = document.getElementById('manualVal'); if(manual) val = parseFloat(manual.value); if(isNaN(val)) val=null; }
+        else { alert("Bluetooth not connected or invalid"); return; }
+        if(val !== null) { let arr = measurements[key]; for(let i=0;i<iterationsCount;i++) if(arr[i] === null) { arr[i]=val; break; } refreshUI(); if(measurements[key].filter(v=>v!==null).length === iterationsCount) autoMoveNext(); }
+    }
+    function autoMoveNext() { if(currentAxisIdx+1<axesList.length) currentAxisIdx++; else if(currentSectionIdx+1<sections.length) { currentSectionIdx++; currentAxisIdx=0; } else { alert("All points completed! Go to Analysis."); refreshUI(); return; } refreshUI(); }
+    function refreshUI() { renderTree(); renderHistoryAndStats(); updateOverallProgress(); renderDataTables(); drawFlangeVisualization(); }
+    function previousAxis() { if(currentAxisIdx-1>=0) currentAxisIdx--; else if(currentSectionIdx-1>=0) { currentSectionIdx--; currentAxisIdx=axesList.length-1; } refreshUI(); }
+    function nextAxis() { if(currentAxisIdx+1<axesList.length) currentAxisIdx++; else if(currentSectionIdx+1<sections.length) { currentSectionIdx++; currentAxisIdx=0; } refreshUI(); }
+    
+    function drawFlangeVisualization() {
+        let canvas = document.getElementById('flangeCanvas');
+        if(!canvas) return;
+        let ctx = canvas.getContext('2d');
+        let size = 380, centerX = size/2, centerY = size/2, radius = 140;
+        canvas.width = size; canvas.height = size;
+        ctx.clearRect(0,0,size,size);
+        ctx.beginPath(); ctx.arc(centerX, centerY, radius-10, 0, 2*Math.PI); ctx.fillStyle = "#0A2A44"; ctx.fill(); ctx.strokeStyle="#2C6E9E"; ctx.lineWidth=2; ctx.stroke();
+        let bolts = 12; let angles = [];
+        for(let i=0;i<bolts;i++) { let angle = (i * 360/bolts) - 90; let rad = angle * Math.PI/180; let x = centerX + (radius-20) * Math.cos(rad); let y = centerY + (radius-20) * Math.sin(rad); ctx.beginPath(); ctx.arc(x, y, 12, 0, 2*Math.PI); ctx.fillStyle = (i===2 || i===5 || i===8) ? "#E34D4D" : "#A0C4E8"; ctx.fill(); ctx.fillStyle = "#0A2540"; ctx.font = "bold 12px Inter"; ctx.fillText([303,302,301,304,300,305,302,303,300,304,301,302][i], x-8, y+4); angles.push({x,y,angle:i}); }
+        ctx.beginPath(); ctx.arc(centerX, centerY, 35, 0, 2*Math.PI); ctx.fillStyle = "#1E6DFF"; ctx.fill(); ctx.fillStyle="white"; ctx.font="bold 14px Inter"; ctx.fillText("SHAFT", centerX-22, centerY+6);
+        ctx.fillStyle = "#F4B836"; ctx.font = "bold 14px Inter"; ctx.fillText("A", centerX+radius-15, centerY+5); ctx.fillText("B", centerX-8, centerY-radius+15); ctx.fillText("C", centerX-radius+15, centerY+5); ctx.fillText("D", centerX-8, centerY+radius-15);
+        ctx.beginPath(); ctx.moveTo(centerX-70, centerY); ctx.lineTo(centerX+70, centerY); ctx.moveTo(centerX, centerY-70); ctx.lineTo(centerX, centerY+70); ctx.strokeStyle = "#FFD966"; ctx.stroke();
+        let vertical=0.05, horizontal=0.02; ctx.beginPath(); ctx.arc(centerX+horizontal*20, centerY+vertical*20, 18, 0, 2*Math.PI); ctx.fillStyle = "#2DC96C"; ctx.fill();
+    }
+    
+    function analyzeAlignment() {
+        let getAvg = (section, axis) => { let vals = measurements[`${section}_${axis}`]?.filter(v=>v!==null) || []; return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : 0; };
+        let upper = {A:getAvg("Upper","A"), B:getAvg("Upper","B"), C:getAvg("Upper","C"), D:getAvg("Upper","D")};
+        let vertOffset = ((upper.B - upper.D) + (getAvg("Clutch","B")-getAvg("Clutch","D")) + (getAvg("Turbine","B")-getAvg("Turbine","D")))/3;
+        let horizOffset = ((upper.A - upper.C) + (getAvg("Clutch","A")-getAvg("Clutch","C")) + (getAvg("Turbine","A")-getAvg("Turbine","C")))/3;
+        let slope = Math.abs(vertOffset)*0.12;
+        document.getElementById('verticalOffsetVal').innerText = vertOffset.toFixed(3)+" mm"; document.getElementById('horizontalOffsetVal').innerText = horizOffset.toFixed(3)+" mm"; document.getElementById('slopeVal').innerText = slope.toFixed(3)+" mm/m";
+        let within = Math.abs(vertOffset) <= 0.08 && Math.abs(horizOffset) <= 0.08;
+        document.getElementById('toleranceBadge').innerHTML = within ? '<i class="fas fa-check-circle"></i> ✓ WITHIN TOLERANCE' : '<i class="fas fa-exclamation-triangle"></i> OUT OF TOLERANCE';
+        let torqueRecs = [{pos:"A",val:"+303 Nm"},{pos:"B",val:"+302 Nm"},{pos:"C",val:"+300 Nm"},{pos:"D",val:"+305 Nm"}];
+        document.getElementById('torqueRecList').innerHTML = torqueRecs.map(r=>`<div class="flex-between"><span>Position ${r.pos}</span><span>${r.val}</span></div>`).join('');
+        document.getElementById('shimRec').innerHTML = within ? "No shim adjustment required" : "Add Shim +0.25 mm / Remove Shim -0.10 mm";
+        if(trendChart) trendChart.destroy(); let ctx = document.getElementById('trendGraphCanvas').getContext('2d');
+        trendChart = new Chart(ctx, { type: 'line', data: { labels: ['Upper A','Upper B','Clutch A','Clutch B','Turbine A','Turbine B'], datasets: [{ label: 'Offset Trend (mm)', data: [upper.A, upper.B, getAvg("Clutch","A"), getAvg("Clutch","B"), getAvg("Turbine","A"), getAvg("Turbine","B")], borderColor: '#1E6DFF', tension: 0.3 }] } });
+        goToStep(2);
+    }
+    
+    function goToStep(step) { currentStep = step; document.getElementById('step0Panel').style.display = step===0?'block':'none'; document.getElementById('step1Panel').style.display = step===1?'block':'none'; document.getElementById('step2Panel').style.display = step===2?'block':'none'; document.getElementById('step3Panel').style.display = step===3?'block':'none'; let steps = document.querySelectorAll('.step-item'); steps.forEach((el,i)=>{ if(i===step) el.classList.add('active'); else el.classList.remove('active'); if(i<step) el.classList.add('completed'); else el.classList.remove('completed'); }); if(step===3){ document.getElementById('reportInspName').innerText = document.getElementById('inspectionName').value; document.getElementById('reportTech').innerText = document.getElementById('techName').value; document.getElementById('reportDate').innerText = new Date().toLocaleString(); document.getElementById('totalMeasPoints').innerText = sections.length*axesList.length+" points"; document.getElementById('reportStatus').innerText = document.getElementById('toleranceBadge').innerText.includes('WITHIN')?'Within Tolerance':'Out of Tolerance'; document.getElementById('finalVert').innerText = document.getElementById('verticalOffsetVal').innerText; document.getElementById('finalHoriz').innerText = document.getElementById('horizontalOffsetVal').innerText; } }
+    
+    // Event bindings
+    document.getElementById('startInspectionBtn')?.addEventListener('click',()=>{ iterationsCount = parseInt(document.getElementById('iterationsCount').value); initData(); refreshUI(); goToStep(1); });
+    document.getElementById('connectBT')?.addEventListener('click',()=>{ btConnected=true; document.getElementById('btStatusText').innerHTML='<i class="fas fa-circle" style="color:#2DC96C;"></i> Connected'; document.getElementById('batteryLevel').innerText='87%'; document.getElementById('signalStrength').innerText='Excellent'; });
+    document.getElementById('disconnectBT')?.addEventListener('click',()=>{ btConnected=false; document.getElementById('btStatusText').innerHTML='<i class="fas fa-circle" style="color:#A0AAB5;"></i> Disconnected'; document.getElementById('batteryLevel').innerText='0%'; document.getElementById('signalStrength').innerText='None'; });
+    document.getElementById('btModeBtn')?.addEventListener('click',()=>{ isBluetoothMode=true; document.getElementById('btModeBtn').classList.add('mode-active'); document.getElementById('manualModeBtn').classList.remove('mode-active'); document.getElementById('manualInputDiv').style.display='none'; });
+    document.getElementById('manualModeBtn')?.addEventListener('click',()=>{ isBluetoothMode=false; document.getElementById('manualModeBtn').classList.add('mode-active'); document.getElementById('btModeBtn').classList.remove('mode-active'); document.getElementById('manualInputDiv').style.display='block'; });
+    document.getElementById('captureBtn')?.addEventListener('click',captureReading); document.getElementById('manualCaptureBtn')?.addEventListener('click',captureReading);
+    document.getElementById('prevAxisBtn')?.addEventListener('click',previousAxis); document.getElementById('nextAxisBtn')?.addEventListener('click',nextAxis);
+    document.getElementById('analyzeBtn')?.addEventListener('click',analyzeAlignment); document.getElementById('goToReportBtn')?.addEventListener('click',()=>goToStep(3));
+    document.getElementById('exportPDFBtn')?.addEventListener('click',()=>alert("PDF Report generated: TurbineAlignment_Report.pdf")); document.getElementById('shareReportBtn')?.addEventListener('click',()=>alert("Report shared with enterprise system.")); document.getElementById('saveInspectionBtn')?.addEventListener('click',()=>alert("Inspection saved successfully."));
+    document.querySelectorAll('.section-tab').forEach(tab=>{ tab.addEventListener('click',(e)=>{ document.querySelectorAll('.section-tab').forEach(t=>t.classList.remove('active')); tab.classList.add('active'); renderDataTables(); }); });
+    setInterval(()=>{ if(currentStep===1 && isBluetoothMode && btConnected) document.getElementById('liveReadingValue').innerText = (48.5+Math.random()*1.8).toFixed(2); }, 1800);
+    updateTorqueDiff(); initData(); refreshUI();
+</script>
+</body>
+</html>
